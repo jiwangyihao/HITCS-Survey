@@ -40,7 +40,7 @@ jobs:
           npm -g upgrade corepack
           corepack enable
           pnpm install
-          pnpm buildS
+          pnpm build
         shell: bash
 
       - name: Upload artifact
