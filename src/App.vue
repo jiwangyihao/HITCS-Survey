@@ -271,9 +271,29 @@ const participatedVerify = computed(
       state.learning === 'none') &&
     ratingVerify.value,
 )
+
+const scrollTop = ref(window.scrollY)
+window.addEventListener('scroll', () => {
+  scrollTop.value = window.scrollY
+})
 </script>
 
 <template>
+  <header :class="scrollTop === 0 ? 'top' : ''">
+    <nav>
+      <a class="name" href="https://github.com/jiwangyihao/HITCS-Survey">
+        <img src="/logo.png" alt="" />
+        <span class="clip">哈尔滨工业大学计算学部学科竞赛调研问卷</span>
+      </a>
+      <a href="https://github.com/jiwangyihao/HITCS-Survey" style="padding: 0 12px">
+        <img
+          src="https://img.shields.io/github/stars/jiwangyihao/HITCS-Survey"
+          alt="star"
+          style="height: auto"
+        />
+      </a>
+    </nav>
+  </header>
   <main class="layout-content">
     <Panel>
       <template #header>
@@ -733,6 +753,45 @@ const participatedVerify = computed(
 </template>
 
 <style scoped>
+header {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 4rem;
+  padding: 0 2rem;
+  transition:
+    background-color 0.5s,
+    border-color 0.5s;
+  z-index: 1000;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(0, 0, 0, 0);
+}
+
+nav {
+  width: 100%;
+  height: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+}
+
+nav a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+nav a img {
+  height: 1.5rem;
+}
+
+nav a span {
+  margin-left: 0.5rem;
+  font-weight: 800;
+}
+
 .layout-content {
   display: flex;
   padding: 6rem 4rem 1rem;
@@ -745,6 +804,20 @@ const participatedVerify = computed(
   .layout-topbar-inner {
     margin: 0 auto;
     max-width: 960px;
+  }
+
+  header {
+    position: fixed;
+  }
+
+  header:not(.top) {
+    background-color: white;
+    border-bottom: 1px solid var(--p-fieldset-border-color);
+  }
+
+  header.top nav a span {
+    background-color: var(--p-primary-color);
+    background-image: none;
   }
 }
 
