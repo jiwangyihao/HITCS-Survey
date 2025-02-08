@@ -37,6 +37,7 @@ jobs:
 
       - name: Build Vue
         run: |
+          npm -g upgrade corepack
           corepack enable
           pnpm install
           pnpm buildS
