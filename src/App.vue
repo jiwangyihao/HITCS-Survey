@@ -177,7 +177,7 @@ const verifyInvalid = ref(false)
 function verify() {
   verifyLoading.value = true
   verifyInvalid.value = false
-  fetch('http://today.hit.edu.cn')
+  fetch('https://today.hit.edu.cn')
     .then((response) => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
