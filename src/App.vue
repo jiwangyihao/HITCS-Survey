@@ -245,7 +245,7 @@ const othersVerify = computed(
         .every(
           (competition) =>
             Object.entries(competition.relativity).some(([_, rating]) => rating > 0) &&
-            competition.relativeReason,
+            competition.relativeReason.length >= 10,
         )) ||
       state.learning === 'none') &&
     moduleVerify.value,
@@ -266,7 +266,7 @@ const participatedVerify = computed(
         (competition) =>
           competition.progress &&
           competition.rating > 0 &&
-          (competition.rating < 3 ? competition.reason : true),
+          (competition.rating < 3 ? competition.reason.length >= 10 : true),
       )) ||
       state.learning === 'none') &&
     ratingVerify.value,
@@ -437,6 +437,7 @@ window.addEventListener('scroll', () => {
           请选择下列模块被标注为【外专业】的比赛中你认为与计算机结合度较高的
         </h3>
         <p class="subtitle">按照相关度从高到低选择。</p>
+        <p class="highlight">本题需要至少选择一项。</p>
         <TransitionGroup class="flex gap-4 flex-col mt-4" name="list" tag="div">
           <div
             v-for="competition in state.rating.外专业"
@@ -493,6 +494,7 @@ window.addEventListener('scroll', () => {
             }}】与计算机中的哪个专业模块结合度较高
           </h3>
           <p class="subtitle">按照相关度从高到低选择</p>
+          <p class="highlight">本题需要至少选择一项。</p>
           <TransitionGroup class="flex gap-4 flex-col mt-4" name="list" tag="div">
             <div
               v-for="[module, rating] in Object.entries(competition.relativity)
@@ -550,6 +552,7 @@ window.addEventListener('scroll', () => {
             }}】与计算机结合度较高的具体理由
           </h3>
           <p class="subtitle">建议从计算机专业模块在该比赛中的实际作用进行说明</p>
+          <p class="highlight">本题理由不少于10个字。</p>
           <div class="flex gap-2 mt-4">
             <FloatLabel variant="on" class="w-full">
               <Textarea
@@ -558,6 +561,9 @@ window.addEventListener('scroll', () => {
                 autoResize
                 :id="`others_relative_reason_${competition.id}`"
                 class="w-full"
+                :invalid="
+                  competition.relativeReason.length > 0 && competition.relativeReason.length < 10
+                "
               />
               <label :for="`others_relative_reason_${competition.id}`">理由</label>
             </FloatLabel>
@@ -577,6 +583,7 @@ window.addEventListener('scroll', () => {
             请按照你认为的各比赛含金量为下面模块被标注为【{{ module }}】的比赛排序
           </h3>
           <p class="subtitle">按照你的主观感受排序即可</p>
+          <p class="highlight">本题为排序题，需要选择所有选项。</p>
           <TransitionGroup class="flex gap-4 flex-col mt-4" name="list" tag="div">
             <div v-for="competition in comps" :key="competition.id" class="flex items-center gap-2">
               <Checkbox
@@ -622,6 +629,7 @@ window.addEventListener('scroll', () => {
         <p class="subtitle">
           请勾选您<span class="highlight">实际报名并参与过</span>的比赛（无论是否晋级或获奖）
         </p>
+        <p class="highlight">本题需要至少选择一项。</p>
         <TreeSelect
           :options="competitionTree"
           selectionMode="checkbox"
@@ -700,8 +708,15 @@ window.addEventListener('scroll', () => {
             }}】主观评价较低的原因
           </h3>
           <p class="subtitle">规则设置、组织安排、题目难度与合理性、评判标准等</p>
+          <p class="highlight">本题理由不少于10个字。</p>
           <FloatLabel variant="on" class="mt-4">
-            <Textarea v-model="competition.reason" rows="5" autoResize fluid />
+            <Textarea
+              v-model="competition.reason"
+              rows="5"
+              autoResize
+              fluid
+              :invalid="competition.reason.length < 10 && competition.reason.length > 0"
+            />
             <label>请填写具体原因</label>
           </FloatLabel>
         </Fieldset>
