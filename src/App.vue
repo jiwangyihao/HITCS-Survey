@@ -28,7 +28,7 @@ type Module =
   | '物联网工程'
   | '信息安全'
   | '电子信息类'
-  | '外专业'
+  | '其他学科'
 
 const state = reactive({
   verify: '',
@@ -50,10 +50,10 @@ const state = reactive({
     物联网工程: [] as { id: string; rating: number }[],
     信息安全: [] as { id: string; rating: number }[],
     电子信息类: [] as { id: string; rating: number }[],
-    外专业: [] as {
+    其他学科: [] as {
       id: string
       rating: number
-      relativity: Record<Exclude<Module, '外专业'>, number>
+      relativity: Record<Exclude<Module, '其他学科'>, number>
       relativeReason: string
     }[],
   },
@@ -99,10 +99,10 @@ watchEffect(() => {
 watchEffect(() => {
   for (const [module, competitions] of Object.entries(state.rating)) {
     const sorted = competitions.sort((a, b) => 1 / b.rating - 1 / a.rating)
-    if (module === '外专业') {
-      state.rating[module] = sorted as (typeof state.rating)['外专业']
+    if (module === '其他学科') {
+      state.rating[module] = sorted as (typeof state.rating)['其他学科']
     } else {
-      state.rating[module as Exclude<Module, '外专业'>] = sorted
+      state.rating[module as Exclude<Module, '其他学科'>] = sorted
     }
   }
 })
@@ -239,8 +239,8 @@ const moduleVerify = computed(
 
 const othersVerify = computed(
   () =>
-    ((state.rating.外专业.some((competition) => competition.rating > 0) &&
-      state.rating.外专业
+    ((state.rating.其他学科.some((competition) => competition.rating > 0) &&
+      state.rating.其他学科
         .filter((competition) => competition.rating > 0)
         .every(
           (competition) =>
@@ -254,7 +254,7 @@ const othersVerify = computed(
 const ratingVerify = computed(
   () =>
     Object.entries(state.rating)
-      .filter(([module]) => module !== '外专业')
+      .filter(([module]) => module !== '其他学科')
       .every(([_, comps]) => comps.every((competition) => competition.rating > 0)) &&
     othersVerify.value,
 )
@@ -286,11 +286,7 @@ window.addEventListener('scroll', () => {
         <span class="clip">哈尔滨工业大学计算学部学科竞赛调研问卷</span>
       </a>
       <a href="https://github.com/jiwangyihao/HITCS-Survey" style="padding: 0 12px">
-        <img
-          src="https://img.shields.io/github/stars/jiwangyihao/HITCS-Survey"
-          alt="star"
-          style="height: auto"
-        />
+        <img src="https://img.shields.io/github/stars/jiwangyihao/HITCS-Survey" alt="star" style="height: auto" />
       </a>
     </nav>
   </header>
@@ -316,22 +312,15 @@ window.addEventListener('scroll', () => {
             <InputText v-model="state.number" id="number" />
             <label for="number">学号</label>
           </FloatLabel>
-          <Button
-            type="button"
-            :label="
-              verifyLoading
-                ? '正在验证校园网环境......'
-                : verifyDisabled
-                  ? '验证成功'
-                  : verifyInvalid
-                    ? '验证失败，请检查校园网后重试'
-                    : '请先验证校园网环境'
-            "
-            @click="verify"
-            :loading="verifyLoading"
-            :disabled="verifyDisabled"
-            :severity="verifyInvalid ? 'danger' : verifyDisabled ? 'success' : ''"
-          />
+          <Button type="button" :label="verifyLoading
+              ? '正在验证校园网环境......'
+              : verifyDisabled
+                ? '验证成功'
+                : verifyInvalid
+                  ? '验证失败，请检查校园网后重试'
+                  : '请先验证校园网环境'
+            " @click="verify" :loading="verifyLoading" :disabled="verifyDisabled"
+            :severity="verifyInvalid ? 'danger' : verifyDisabled ? 'success' : ''" />
         </div>
       </Fieldset>
       <Fieldset legend="单选题*" v-if="basicVerify">
@@ -370,7 +359,7 @@ window.addEventListener('scroll', () => {
           <div class="flex items-center gap-2">
             <RadioButton inputId="learning-none" value="none" />
             <label for="learning-none">
-              基本完全不了解（不关心科创竞赛，没有参赛经历）<br />
+              不了解（不关心科创竞赛，没有参赛经历）<br />
               <span class="highlight">
                 注意：选择该选项会严重影响你的作答在最终评价中的权重，同时导致你后续可回答的问题数量明显变少
               </span>
@@ -378,10 +367,7 @@ window.addEventListener('scroll', () => {
           </div>
         </RadioButtonGroup>
       </Fieldset>
-      <Fieldset
-        legend="矩阵选择题*"
-        v-if="learningVerify && !['none', 'limited'].includes(state.learning)"
-      >
+      <Fieldset legend="矩阵选择题*" v-if="learningVerify && !['none', 'limited'].includes(state.learning)">
         <h3>
           <span class="text-bold">02</span>
           从计算机的学科视角来看，你认为下列竞赛应该被划分至哪个细分模块？
@@ -398,7 +384,7 @@ window.addEventListener('scroll', () => {
           <li>物联网工程：实现物体互联互通的工程应用。</li>
           <li>信息安全：保护信息的机密性、完整性和可用性。</li>
           <li>电子信息类：涉及电子技术和信息技术的学科领域。</li>
-          <li>外专业：与当前专业不直接相关的其他专业或领域。</li>
+          <li>其他学科：与计算机学科不直接相关的其他学科或领域。</li>
         </ul>
         <p class="subtitle">
           出于方便填答考虑，所有比赛（赛道）均已根据笔者对相关比赛的了解被分配了一个初始值，您可以根据您对比赛的了解改变您认为不妥的划分。
@@ -408,24 +394,20 @@ window.addEventListener('scroll', () => {
             <template v-for="(competition, index) in state.competitions" :key="competition.id">
               <Divider v-if="index > 0" />
               <div class="flex gap-2 items-center">
-                <label>{{ competitions.find((comp) => competition.id === comp.id)?.name }}</label>
+                <label>{{competitions.find((comp) => competition.id === comp.id)?.name}}</label>
                 <span class="flex-grow"></span>
-                <Select
-                  v-model="competition.module"
-                  :options="[
-                    '创新创业',
-                    '数学建模与数据科学',
-                    '算法设计',
-                    '软件工程',
-                    '操作系统',
-                    '人工智能',
-                    '物联网工程',
-                    '信息安全',
-                    '电子信息类',
-                    '外专业',
-                  ]"
-                  placeholder="请选择对应的模块"
-                />
+                <Select v-model="competition.module" :options="[
+                  '创新创业',
+                  '数学建模与数据科学',
+                  '算法设计',
+                  '软件工程',
+                  '操作系统',
+                  '人工智能',
+                  '物联网工程',
+                  '信息安全',
+                  '电子信息类',
+                  '其他学科',
+                ]" placeholder="请选择对应的模块" />
               </div>
             </template>
           </ScrollPanel>
@@ -434,58 +416,45 @@ window.addEventListener('scroll', () => {
       <Fieldset legend="顺序多选题*" v-if="moduleVerify && state.learning !== 'none'">
         <h3>
           <span class="text-bold">03</span>
-          请选择下列模块被标注为【外专业】的比赛中你认为与计算机结合度较高的
+          请选择下列模块被标注为【其他学科】的比赛中你认为与计算机结合度较高的
         </h3>
         <p class="subtitle">按照相关度从高到低选择。</p>
-        <p class="highlight">本题需要至少选择一项。</p>
+        <p class="highlight">本题需要至少选择一项<span v-if="['none', 'limited', 'average'].includes(state.learning)" class="highlight">，最多选三项</span></p>
+        <p class="highlight">注意：每选择一个选项，你都需要提供相应的理由。</p>
         <TransitionGroup class="flex gap-4 flex-col mt-4" name="list" tag="div">
-          <div
-            v-for="competition in state.rating.外专业"
-            :key="competition.id"
-            class="flex items-center gap-2"
-          >
-            <Checkbox
-              :inputId="`others_rating_${competition.id}`"
-              :value="true"
-              @update:modelValue="
-                (value) => {
-                  if (value.length > 0) {
-                    competition.rating =
-                      Math.max(...state.rating.外专业.map((comp) => comp.rating), 0) + 1
-                    for (const [module, _relativity] of Object.entries(competition.relativity)) {
-                      competition.relativity[module as Exclude<Module, '外专业'>] = -1
-                    }
-                  } else {
-                    state.rating.外专业.forEach((comp) => {
-                      if (comp.rating > competition.rating) {
-                        comp.rating--
-                      }
-                    })
-                    competition.rating = -1
+          <div v-for="competition in state.rating.其他学科" :key="competition.id" class="flex items-center gap-2">
+            <Checkbox :inputId="`others_rating_${competition.id}`" :value="true" @update:modelValue="
+              (value) => {
+                if (value.length > 0) {
+                  competition.rating =
+                    Math.max(...state.rating.其他学科.map((comp) => comp.rating), 0) + 1
+                  for (const [module, _relativity] of Object.entries(competition.relativity)) {
+                    competition.relativity[module as Exclude<Module, '其他学科'>] = -1
                   }
+                } else {
+                  state.rating.其他学科.forEach((comp) => {
+                    if (comp.rating > competition.rating) {
+                      comp.rating--
+                    }
+                  })
+                  competition.rating = -1
                 }
-              "
-            >
+              }
+            " :disabled=" ['none', 'limited', 'average'].includes(state.learning)&& Math.max(...state.rating.其他学科.map((comp) => comp.rating), 0) >= 3 && competition.rating===-1">
               <template #icon="{ checked }">
-                <span
-                  class="p-checkbox-icon p-icon"
-                  style="width: unset; height: unset"
-                  v-if="checked"
-                >
+                <span class="p-checkbox-icon p-icon" style="width: unset; height: unset" v-if="checked">
                   {{ competition.rating }}
                 </span>
               </template>
             </Checkbox>
             <label :for="`others_rating_${competition.id}`">
-              {{ competitions.find((comp) => competition.id === comp.id)?.name }}
+              {{competitions.find((comp) => competition.id === comp.id)?.name}}
             </label>
           </div>
         </TransitionGroup>
       </Fieldset>
-      <template
-        v-for="(competition, index) in state.rating.外专业.filter((comp) => comp.rating > 0)"
-        :key="competition.id"
-      >
+      <template v-for="(competition, index) in state.rating.其他学科.filter((comp) => comp.rating > 0)"
+        :key="competition.id">
         <Fieldset legend="顺序多选题*">
           <h3>
             <span class="text-bold">04.{{ index + 1 }}</span>
@@ -496,44 +465,32 @@ window.addEventListener('scroll', () => {
           <p class="subtitle">按照相关度从高到低选择</p>
           <p class="highlight">本题需要至少选择一项。</p>
           <TransitionGroup class="flex gap-4 flex-col mt-4" name="list" tag="div">
-            <div
-              v-for="[module, rating] in Object.entries(competition.relativity)
-                .filter(([module, relativity]) => !!module && module !== 'undefined')
-                .sort((a, b) => 1 / b[1] - 1 / a[1])"
-              :key="module"
-              class="flex items-center gap-2"
-            >
-              <Checkbox
-                :inputId="`others_relative_${competition.id}_${module}`"
-                :value="true"
-                @update:modelValue="
-                  (value) => {
-                    if (value.length > 0) {
-                      competition.relativity[module as Exclude<Module, '外专业'>] =
-                        Math.max(
-                          ...Object.entries(competition.relativity).map((rela) => rela[1]),
-                          0,
-                        ) + 1
-                    } else {
-                      Object.entries(competition.relativity).forEach(([m, _rating]) => {
-                        if (
-                          competition.relativity[m as Exclude<Module, '外专业'>] >
-                          competition.relativity[module as Exclude<Module, '外专业'>]
-                        ) {
-                          competition.relativity[m as Exclude<Module, '外专业'>]--
-                        }
-                      })
-                      competition.relativity[module as Exclude<Module, '外专业'>] = -1
-                    }
+            <div v-for="[module, rating] in Object.entries(competition.relativity)
+              .filter(([module, relativity]) => !!module && module !== 'undefined')
+              .sort((a, b) => 1 / b[1] - 1 / a[1])" :key="module" class="flex items-center gap-2">
+              <Checkbox :inputId="`others_relative_${competition.id}_${module}`" :value="true" @update:modelValue="
+                (value) => {
+                  if (value.length > 0) {
+                    competition.relativity[module as Exclude<Module, '其他学科'>] =
+                      Math.max(
+                        ...Object.entries(competition.relativity).map((rela) => rela[1]),
+                        0,
+                      ) + 1
+                  } else {
+                    Object.entries(competition.relativity).forEach(([m, _rating]) => {
+                      if (
+                        competition.relativity[m as Exclude<Module, '其他学科'>] >
+                        competition.relativity[module as Exclude<Module, '其他学科'>]
+                      ) {
+                        competition.relativity[m as Exclude<Module, '其他学科'>]--
+                      }
+                    })
+                    competition.relativity[module as Exclude<Module, '其他学科'>] = -1
                   }
-                "
-              >
+                }
+              ">
                 <template #icon="{ checked }">
-                  <span
-                    class="p-checkbox-icon p-icon"
-                    style="width: unset; height: unset"
-                    v-if="checked"
-                  >
+                  <span class="p-checkbox-icon p-icon" style="width: unset; height: unset" v-if="checked">
                     {{ rating }}
                   </span>
                 </template>
@@ -555,29 +512,18 @@ window.addEventListener('scroll', () => {
           <p class="highlight">本题理由不少于10个字。</p>
           <div class="flex gap-2 mt-4">
             <FloatLabel variant="on" class="w-full">
-              <Textarea
-                v-model="competition.relativeReason"
-                rows="5"
-                autoResize
-                :id="`others_relative_reason_${competition.id}`"
-                class="w-full"
-                :invalid="
-                  competition.relativeReason.length > 0 && competition.relativeReason.length < 10
-                "
-              />
+              <Textarea v-model="competition.relativeReason" rows="5" autoResize
+                :id="`others_relative_reason_${competition.id}`" class="w-full" :invalid="competition.relativeReason.length > 0 && competition.relativeReason.length < 10
+                  " />
               <label :for="`others_relative_reason_${competition.id}`">理由</label>
             </FloatLabel>
           </div>
         </Fieldset>
       </template>
       <template v-if="othersVerify">
-        <Fieldset
-          legend="排序题*"
-          v-for="([module, comps], index) in Object.entries(state.rating).filter(
-            ([module]) => module !== '外专业',
-          )"
-          :key="module"
-        >
+        <Fieldset legend="排序题*" v-for="([module, comps], index) in Object.entries(state.rating).filter(
+          ([module]) => module !== '其他学科',
+        )" :key="module">
           <h3>
             <span class="text-bold">06.{{ index + 1 }}</span>
             请按照你认为的各比赛含金量为下面模块被标注为【{{ module }}】的比赛排序
@@ -586,36 +532,28 @@ window.addEventListener('scroll', () => {
           <p class="highlight">本题为排序题，需要选择所有选项。</p>
           <TransitionGroup class="flex gap-4 flex-col mt-4" name="list" tag="div">
             <div v-for="competition in comps" :key="competition.id" class="flex items-center gap-2">
-              <Checkbox
-                :inputId="`modules_rating_${competition.id}`"
-                :value="true"
-                @update:modelValue="
-                  (value) => {
-                    if (value.length > 0) {
-                      competition.rating = Math.max(...comps.map((comp) => comp.rating), 0) + 1
-                    } else {
-                      comps.forEach((comp) => {
-                        if (comp.rating > competition.rating) {
-                          comp.rating--
-                        }
-                      })
-                      competition.rating = -1
-                    }
+              <Checkbox :inputId="`modules_rating_${competition.id}`" :value="true" @update:modelValue="
+                (value) => {
+                  if (value.length > 0) {
+                    competition.rating = Math.max(...comps.map((comp) => comp.rating), 0) + 1
+                  } else {
+                    comps.forEach((comp) => {
+                      if (comp.rating > competition.rating) {
+                        comp.rating--
+                      }
+                    })
+                    competition.rating = -1
                   }
-                "
-              >
+                }
+              ">
                 <template #icon="{ checked }">
-                  <span
-                    class="p-checkbox-icon p-icon"
-                    style="width: unset; height: unset"
-                    v-if="checked"
-                  >
+                  <span class="p-checkbox-icon p-icon" style="width: unset; height: unset" v-if="checked">
                     {{ competition.rating }}
                   </span>
                 </template>
               </Checkbox>
               <label :for="`modules_rating_${competition.id}`">
-                {{ competitions.find((comp) => competition.id === comp.id)?.name }}
+                {{competitions.find((comp) => competition.id === comp.id)?.name}}
               </label>
             </div>
           </TransitionGroup>
@@ -630,17 +568,8 @@ window.addEventListener('scroll', () => {
           请勾选您<span class="highlight">实际报名并参与过</span>的比赛（无论是否晋级或获奖）
         </p>
         <p class="highlight">本题需要至少选择一项。</p>
-        <TreeSelect
-          :options="competitionTree"
-          selectionMode="checkbox"
-          filter
-          filterMode="strict"
-          display="chip"
-          placeholder="选择比赛，支持筛选"
-          fluid
-          class="mt-4"
-          showClear
-          @change="
+        <TreeSelect :options="competitionTree" selectionMode="checkbox" filter filterMode="strict" display="chip"
+          placeholder="选择比赛，支持筛选" fluid class="mt-4" showClear @change="
             (value) => {
               state.participated =
                 Object.entries(value)
@@ -652,8 +581,7 @@ window.addEventListener('scroll', () => {
                         .children!.find((child) => child.key === id)!.data!,
                   ) || []
             }
-          "
-        />
+          " />
       </Fieldset>
       <template v-for="(competition, index) in state.participated" :key="competition.id">
         <Fieldset legend="单选题*">
@@ -664,16 +592,10 @@ window.addEventListener('scroll', () => {
             }}】中你最终进入的比赛阶段
           </h3>
           <p class="subtitle">请根据您实际参与并晋级的最高阶段进行选择（即使在该阶段被淘汰）</p>
-          <RadioButtonGroup
-            :name="`progress-${competition.id}`"
-            class="flex gap-4 flex-col mt-4"
-            v-model="competition.progress"
-          >
+          <RadioButtonGroup :name="`progress-${competition.id}`" class="flex gap-4 flex-col mt-4"
+            v-model="competition.progress">
             <div class="flex items-center gap-2">
-              <RadioButton
-                :inputId="`national-awarded-${competition.id}`"
-                value="national-awarded"
-              />
+              <RadioButton :inputId="`national-awarded-${competition.id}`" value="national-awarded" />
               <label :for="`national-awarded-${competition.id}`"> 国赛获奖 </label>
             </div>
             <div class="flex items-center gap-2">
@@ -710,13 +632,8 @@ window.addEventListener('scroll', () => {
           <p class="subtitle">规则设置、组织安排、题目难度与合理性、评判标准等</p>
           <p class="highlight">本题理由不少于10个字。</p>
           <FloatLabel variant="on" class="mt-4">
-            <Textarea
-              v-model="competition.reason"
-              rows="5"
-              autoResize
-              fluid
-              :invalid="competition.reason.length < 10 && competition.reason.length > 0"
-            />
+            <Textarea v-model="competition.reason" rows="5" autoResize fluid
+              :invalid="competition.reason.length < 10 && competition.reason.length > 0" />
             <label>请填写具体原因</label>
           </FloatLabel>
         </Fieldset>
@@ -741,26 +658,18 @@ window.addEventListener('scroll', () => {
         </h3>
         <p class="subtitle">
           请<span class="highlight">全选</span>复制下方的填答结果并在随后内嵌的
-          <span class="highlight">Microsoft Forms</span> 中粘贴提交，给您带来的不便敬请谅解！
+          <span class="highlight">Microsoft Forms</span> 中粘贴提交
         </p>
+        <p class="highlight">问卷结果使用非对称加密技术保护，您的填答结果不会被第三方使用，给您带来的不便敬请谅解！</p>
         <FloatLabel variant="on" class="mt-4">
           <Textarea v-model="stateResult" rows="5" fluid />
           <label>填答结果</label>
         </FloatLabel>
 
-        <iframe
-          height="480px"
+        <iframe height="480px"
           src="https://forms.office.com/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAO__Q331eFUNkVMS0xYWVZZRjBHWEJVRjY0SUxJTE1TOS4u&embed=true"
-          frameborder="0"
-          marginwidth="0"
-          marginheight="0"
-          class="card mt-4 w-full"
-          style="padding: 0"
-          allowfullscreen
-          webkitallowfullscreen
-          mozallowfullscreen
-          msallowfullscreen
-        >
+          frameborder="0" marginwidth="0" marginheight="0" class="card mt-4 w-full" style="padding: 0" allowfullscreen
+          webkitallowfullscreen mozallowfullscreen msallowfullscreen>
         </iframe>
       </Fieldset>
     </Panel>
@@ -814,6 +723,7 @@ nav a span {
 }
 
 @media screen and (min-width: 1080px) {
+
   .layout-content,
   .layout-footer,
   .layout-topbar-inner {
@@ -837,6 +747,7 @@ nav a span {
 }
 
 @media screen and (max-width: 1080px) {
+
   .layout-content,
   .layout-footer {
     padding-left: 2rem;
@@ -845,6 +756,7 @@ nav a span {
 }
 
 @media screen and (max-width: 575px) {
+
   .layout-content,
   .layout-footer {
     padding-left: 1rem;
